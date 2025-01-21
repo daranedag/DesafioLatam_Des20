@@ -28,6 +28,18 @@ const addPost = async (titulo, img, descripcion) => {
     await pool.query(query, values)
 };
 
+const updatePost = async (id) => {
+    const query = `UPDATE posts SET likes=likes+1 WHERE id = $1`
+    const value = [id]
+    await pool.query(query, value)
+};
+
+const deletePost = async (id) => {
+    const query = `DELETE FROM posts where id = $1`
+    const value = [id]
+    await pool.query(query, value)
+}
+
 app.get("/posts", async (req, res) => {
     try{
         const posts = await getPosts()
@@ -50,6 +62,29 @@ app.post('/posts', async (req, res) => {
         res.status(500).send('Error en el servidor al agregar el post');
     }
 });
+
+app.put('/posts/like/:id', async (req, res) => {
+    const { id } = req.params
+    try{
+        await updatePost(id);
+        res.send('Post actualizado exitosamente')
+    }
+    catch(error){
+        console.error('Error al actualizar el post:', error);
+        res.status(500).send('Error en el serviro al actualizar el post')
+    }
+})
+
+app.delete('/posts/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await deletePost(id);
+        res.send('Post eliminado exitosamente');
+    } catch (error) {
+        console.error('Error eliminando el post:', error);
+        res.status(500).send('Error en el servidor al eliminar el post');
+    }
+})
 
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
